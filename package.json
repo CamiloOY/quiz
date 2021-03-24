@@ -1,0 +1,42 @@
+{
+	"name": "quiz",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"test": "jest"
+	},
+	"dependencies": {
+		"@testing-library/jest-dom": "^5.11.9",
+		"animejs": "^3.2.1",
+		"axios": "^0.21.1",
+		"bcrypt": "^5.0.1",
+		"classnames": "^2.2.6",
+		"cookie": "^0.4.1",
+		"dotenv": "^8.2.0",
+		"formik": "^2.2.6",
+		"jsonwebtoken": "^8.5.1",
+		"next": "10.0.9",
+		"next-connect": "^0.10.1",
+		"pg": "^8.5.1",
+		"react": "17.0.1",
+		"react-dom": "17.0.1",
+		"react-icons": "^4.2.0",
+		"react-transition-group": "^4.4.1",
+		"yup": "^0.32.9"
+	},
+	"devDependencies": {
+		"@testing-library/react": "^11.2.5",
+		"@testing-library/user-event": "^13.0.8",
+		"autoprefixer": "^10.2.5",
+		"eslint": "^7.22.0",
+		"eslint-plugin-react": "^7.22.0",
+		"jest": "^26.6.3",
+		"next-test-api-route-handler": "^1.2.23",
+		"node-mocks-http": "^1.10.1",
+		"postcss": "^8.2.8",
+		"tailwindcss": "^2.0.4"
+	}
+}
