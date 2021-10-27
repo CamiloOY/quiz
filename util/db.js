@@ -28,8 +28,16 @@ export async function createQuiz(name, question_order_random, visibility) {
 	return result;
 }
 
-export function validateUser(name, email, password) {
-	if(name.length < 1 || typeof(name) !== "string") {
-		throw new Error("Invalid user data");
+export async function verifyUser(email, password) {
+	const result = await pool.query("SELECT * FROM users WHERE email=$1", [email]);
+	if(!result.rows[0]) {
+		throw new Error("This user doesn't exist");
 	}
+	const isUser = await bcrypt.compare(password, result.rows[0].password);
+	return isUser ? result.rows[0] : isUser;
+}
+
+export async function getUserScores(user_id) {
+	const result = await pool.query("SELECT * FROM scores WHERE user_id=$1", [user_id]);
+	return result.rows;
 }

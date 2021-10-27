@@ -12,15 +12,9 @@ afterEach(() => {
 });
 
 describe("/signup", () => {
-	it("should return a 400 error when insufficient data is sent", async () => {
-		await testApiHandler({handler, test: async ({fetch}) => {
-			const res = await fetch({method: "POST", body: JSON.stringify({})});
-			expect(res.status).toBe(400);
-		}});
-	});
-
 	it("should return a 409 error when the user already exists", async () => {
 		const payload = {email: "a@h.h", name: "FAKE", password: "FAKE_PASSWORD"};
+		jest.spyOn(console, "log").mockImplementation(() => {});
 		createUser.mockImplementation(() => {throw new Error()});
 		doesUserExist.mockImplementation(() => true);
 
@@ -30,6 +24,7 @@ describe("/signup", () => {
 			expect(createUser).toHaveBeenCalledTimes(1);
 			expect(doesUserExist).toHaveBeenCalledTimes(1);
 		}});
+		console.log.mockRestore();
 	});
 
 	it("should return correct data when request is successful", async () => {
@@ -45,7 +40,22 @@ describe("/signup", () => {
 			expect(createUser).toHaveBeenCalledWith(payload.name, payload.email, payload.password);
 			const json = await res.json();
 			expect(json).toStrictEqual(result);
-			expect(parse(res.headers.get("set-cookie"))).toEqual(expect.objectContaining({token: "token123"}));
-		}})
+			const cookieStrings = res.headers.get("set-cookie").split(", ");
+			const cookies = cookieStrings.map(cookie => parse(cookie));
+			expect(cookies).toEqual(expect.arrayContaining([expect.objectContaining({token: "token123"}), expect.objectContaining({isAuthenticated: "true"})]));
+		}});
+	});
+
+	it("should throw a 500 error on unknown error", async () => {
+		jest.spyOn(console, "log");
+		console.log.mockImplementation(() => {});
+		createUser.mockImplementation(() => {throw new Error("Unknown Error")});
+		doesUserExist.mockImplementation(() => false);
+		await testApiHandler({handler, test: async ({fetch}) => {
+			const res = await fetch({method: "POST", body: JSON.stringify({email: "FAKE@FAKE.FAKE", name: "FAKE_NAME", password: "FAKE_PASSWORD"})});
+			expect(res.status).toBe(500);
+			expect(createNewToken).not.toHaveBeenCalled();
+		}});
+		console.log.mockRestore();
 	});
 });

@@ -1,4 +1,4 @@
-import {render, fireEvent, waitFor} from "@testing-library/react";
+import {render, waitFor} from "@testing-library/react";
 import SignUp from "../pages/signup";
 import user from "@testing-library/user-event";
 import {publicAxios} from "../util/fetch";
@@ -70,14 +70,14 @@ describe("Signup page", () => {
 		const {getByLabelText, getByText} = render(<SignUp />);
 		publicAxios.post.mockImplementation(() => {});
 		await waitFor(() => {
-			user .click(getByText("Sign up"));
+			user.click(getByText("Sign up"));
 		});
 		expect(publicAxios.post).not.toHaveBeenCalled();
 		user.type(getByLabelText("Email"), body.email);
 		user.type(getByLabelText("Name"), body.name);
 		user.type(getByLabelText("Password"), body.password);
 		await waitFor(() => {
-			user .click(getByText("Sign up"));
+			user.click(getByText("Sign up"));
 		});
 		expect(publicAxios.post).not.toHaveBeenCalled();
 	});

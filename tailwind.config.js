@@ -7,12 +7,21 @@ module.exports = {
 		extend: {
 			colors: {
 				cyan: colours.cyan,
-				lightBlue: colours.lightBlue
+				lightBlue: colours.lightBlue,
+				green: colours.green,
+				emerald: colours.emerald,
+				grey: colours.gray,
+				coolGrey: colours.coolGray,
+				trueGrey: colours.trueGray,
+				warmGrey: colours.warmGray
+			},
+			fontFamily: {
+				"nunito": ["Nunito"]
 			}
 		},
 	},
 	variants: {
 		extend: {},
 	},
-	plugins: [],
+	plugins: [require("@tailwindcss/forms")],
 }
