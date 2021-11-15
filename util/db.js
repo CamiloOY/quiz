@@ -24,8 +24,8 @@ export async function doesUserExist(email) {
 }
 
 export async function createQuiz(name, question_order_random, visibility) {
-	const result = await pool.query("INSERT INTO quizzes(name, question_order_random, visibility) VALUES($1, $2, $3)", [name, question_order_random, visibility]);
-	return result;
+	const result = await pool.query("INSERT INTO quizzes(name, question_order_random, visibility) VALUES($1, $2, $3) RETURNING quiz_id", [name, question_order_random, visibility]);
+	return result.rows[0];
 }
 
 export async function verifyUser(email, password) {
@@ -40,4 +40,9 @@ export async function verifyUser(email, password) {
 export async function getUserScores(user_id) {
 	const result = await pool.query("SELECT * FROM scores WHERE user_id=$1", [user_id]);
 	return result.rows;
+}
+
+export async function addQuestion(quiz_id, question, correct_answer, wrong_answers, question_position) {
+	const result = await pool.query("INSERT INTO questions(quiz_id, question, correct_answer, wrong_answers, question_position) VALUES($1, $2, $3, $4, $5)", [quiz_id, question, correct_answer, wrong_answers, question_position]);
+	return result;
 }

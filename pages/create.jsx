@@ -23,30 +23,29 @@ const quizInitialValues = {
 
 const questionInitialValues = {
 	question: "",
-	answers: [],
-	display_answers: 0,
-	timer: "infinite"
+	answers: []
 };
 
 class Create extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			addingQuestions: true,
-			questionNum: 1
+			addingQuestions: false,
+			questionNum: 1,
+			quizTitle: ""
 		};
-		this.submitQuiz = this.submitQuiz.bind(this);
+		this.createQuiz = this.createQuiz.bind(this);
 		this.addQuestion = this.addQuestion.bind(this);
 	}
 
-	async submitQuiz(data, helpers) {
+	async createQuiz(data, helpers) {
 		console.log(data);
 		try {
 			helpers.setSubmitting(true);
 			// Post quiz to appropriate endpoint
-			await authAxios.post("/quiz", data);
-			// Set addingQuestions to true
-			this.setState({addingQuestions: true});
+			const response = await authAxios.post("/quiz", data);
+			// Set addingQuestions to true, set the quiz's title and id
+			this.setState({addingQuestions: true, quizTitle: data.name, quiz_id: response.data.quiz_id});
 		}
 		catch(error) {
 			console.log(error);
@@ -55,7 +54,17 @@ class Create extends React.Component {
 	}
 
 	async addQuestion(data, helpers) {
-
+		console.log("in addquestion: ", data);
+		try {
+			helpers.setSubmitting(true);
+			const response = await authAxios.post("/question", {...data, quiz_id: this.state.quiz_id, question_position: this.state.questionNum});
+			helpers.resetForm();
+			this.setState(state => ({questionNum: state.questionNum + 1}));
+		}
+		catch(error) {
+			console.log(error);
+			helpers.setSubmitting(false);
+		}
 	}
 
 	async handleTitleChange(e, handleChange) {
@@ -75,23 +84,27 @@ class Create extends React.Component {
 				</Head>
 				{this.state.addingQuestions ? (
 					<>
-						<QuizHeader questionNumber={this.state.questionNum} />
+						<div className="flex shadow-md flex-row p-3 justify-between items-center">
+							<div className="font-semibold text-lg">{this.state.quizTitle}: Question {this.state.questionNum}</div>
+							<Button>Finish</Button>
+						</div>
 						<Formik initialValues={questionInitialValues} validationSchema={questionSchema} onSubmit={this.addQuestion}>
-							{({isSubmitting, handleChange, values}) => (
+							{({isSubmitting, handleChange, values, setFieldValue}) => (
 								<Form className="">
-									<Field name="question" placeholder="Question" as="textarea" rows="1" wrap="hard" id="question" className="border border-grey-300 mt-1 px-3 py-2 rounded-sm text-3xl font-semibold block m-auto resize-none overflow-hidden focus:outline-none focus:ring-1 focus:ring-lightBlue-500 focus:border-lightBlue-500" onChange={e => this.handleTitleChange(e, handleChange)} required />
+									<Field name="question" placeholder="Question" as="textarea" rows="1" wrap="hard" id="question" className="border border-grey-300 mt-1 px-3 py-2 rounded- text-3xl font-semibold block m-auto resize-none overflow-hidden focus:outline-none focus:ring-1 focus:ring-lightBlue-500 focus:border-lightBlue-500" onChange={e => this.handleTitleChange(e, handleChange)} required />
 									<FieldArray name="answers">
 										{helpers => {
-											console.log(values.answers);
+											console.log(values);
 											return (
 											<div className="">
 												{values.answers.map((answer, i) => (
-													<Field name={`answers.${i}.input`} placeholder="Answer text" component={AnswerInput} id={`answers.${i}.input`} key={i} />
+													<Field name={`answers[${i}]`} placeholder="Answer text" component={AnswerInput} id={`answers[${i}]`} key={i} removeSelf={() => helpers.remove(i)} setCorrect={() => setFieldValue("correct_answer", i)} correct={values.correct_answer === i} />
 												))}
-												<Button type="button" onClick={() => helpers.push({answer: "", correct: false})}>Add answer</Button>
+												<Button type="button" onClick={() => helpers.push("")} className="mt-4">Add answer</Button>
 											</div>
 										)}}
 									</FieldArray>
+									<div className="flex justify-end fixed bottom-2 right-2"><Button type="submit" disabled={isSubmitting}>Add another question</Button></div>
 								</Form>
 							)}
 						</Formik>
@@ -107,7 +120,7 @@ class Create extends React.Component {
 						<AltNavbar isLoggedIn />
 						<h1 className="text-center text-4xl font-semibold tracking-wide">Create a new quiz</h1>
 						<div className="flex items-center justify-center flex-grow">
-							<Formik initialValues={quizInitialValues} validationSchema={quizSchema} onSubmit={this.submitQuiz}>
+							<Formik initialValues={quizInitialValues} validationSchema={quizSchema} onSubmit={this.createQuiz}>
 								{({isSubmitting}) => (
 									<Form className="w-full px-3 sm:max-w-2xl">
 										<Field name="name" placeholder="Name" component={TextInput} type="text" label="Quiz Name" id="name" required />
